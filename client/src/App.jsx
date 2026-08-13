@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EditTrip from "./components/EditTrip";
 
 function App() {
   return (
@@ -13,13 +14,24 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard"
-        element={
-        <ProtectedRoute>
-          <Dashboard />
-          </ProtectedRoute>
-  }
-/>
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/trips/edit/:id"
+          element={
+            <ProtectedRoute>
+              <EditTrip />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
