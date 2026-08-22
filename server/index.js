@@ -1,12 +1,20 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+dotenv.config();
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const tripRoutes = require("./routes/trips");
 
-// Load environment variables
-dotenv.config();
+console.log("Cloudinary Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
+console.log(
+  "Cloudinary API Key loaded:",
+  !!process.env.CLOUDINARY_API_KEY
+);
+console.log(
+  "Cloudinary API Secret loaded:",
+  !!process.env.CLOUDINARY_API_SECRET
+);
 
 // Connect to MongoDB
 connectDB();

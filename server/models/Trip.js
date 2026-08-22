@@ -30,6 +30,15 @@ const tripSchema = new mongoose.Schema(
       max: 5,
     },
 
+    coverImage: {
+      type: String,
+    },
+    
+    photos: {
+      type: [String],
+      default: [],
+    },
+
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

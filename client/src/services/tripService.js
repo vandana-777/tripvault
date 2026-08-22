@@ -41,3 +41,20 @@ export const deleteTrip = (token, tripId) => {
     },
   });
 };
+
+export const uploadTripPhoto = (token, tripId, photo) => {
+  const formData = new FormData();
+
+  formData.append("image", photo);
+
+  return axios.post(
+    `${API_URL}/${tripId}/upload`,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+};

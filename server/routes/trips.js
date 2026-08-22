@@ -1,6 +1,7 @@
 const express = require("express");
 const Trip = require("../models/Trip");
 const authMiddleware = require("../middleware/authMiddleware");
+const upload = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -72,6 +73,58 @@ router.get("/:id", authMiddleware, async (req, res) => {
     });
   }
 });
+
+// POST /api/trips/:id/upload
+// Upload a photo to Cloudinary and attach it to the trip
+router.post(
+  "/:id/upload",
+  authMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const trip = await Trip.findById(req.params.id);
+
+      if (!trip) {
+        return res.status(404).json({
+          message: "Trip not found",
+        });
+      }
+
+      // Check ownership
+      if (trip.user.toString() !== req.user.id) {
+        return res.status(403).json({
+          message: "Not authorized to upload to this trip",
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          message: "Please upload an image",
+        });
+      }
+
+      const imageUrl = req.file.path;
+
+      trip.photos.push(imageUrl);
+
+// Uploaded photo becomes the new cover image  
+      trip.coverImage = imageUrl;
+
+      const updatedTrip = await trip.save();
+
+      res.status(200).json({
+        message: "Photo uploaded successfully",
+        trip: updatedTrip,
+      });
+    } catch (error) {
+      console.error("Upload Photo Error:", error);
+
+      res.status(500).json({
+        message: "Failed to upload photo",
+      });
+    }
+  }
+);
 // PUT /api/trips/:id
 // Update a trip - owner only
 router.put("/:id", authMiddleware, async (req, res) => {

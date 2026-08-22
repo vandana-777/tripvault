@@ -6,6 +6,11 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditTrip from "./components/EditTrip";
+import TripForm from "./components/TripForm";
+import TripDetail from "./pages/TripDetail";
+import PublicProfile from "./pages/PublicProfile";
+import DiscoverTravelers from "./pages/DiscoverTravelers";
+import MyJourneys from "./pages/MyJourneys";
 
 function App() {
   return (
@@ -31,6 +36,31 @@ function App() {
               <EditTrip />
             </ProtectedRoute>
           }
+        />
+        <Route path="/trips/create" element={
+          <ProtectedRoute>
+            <TripForm />
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/trips/:id" element={
+          <ProtectedRoute>
+            <TripDetail />
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/my-journeys" element={
+          <ProtectedRoute>
+            <MyJourneys />
+          </ProtectedRoute>
+        }
+        />
+        <Route
+        path="/profile/:id"
+        element={<PublicProfile />}
+        />
+        <Route path="/discover"
+        element={<DiscoverTravelers />}
         />
       </Routes>
     </BrowserRouter>

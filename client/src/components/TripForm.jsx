@@ -1,7 +1,11 @@
+import axios from "axios";
 import { useState } from "react";
-import { createTrip } from "../services/tripService";
+import { createTrip,uploadTripPhoto } from "../services/tripService";
+import { useNavigate } from "react-router-dom";
+import { getDestinationImage } from "../utils/destinationImages";
 
 function TripForm({ onTripCreated, onCancel }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     destination: "",
@@ -10,6 +14,7 @@ function TripForm({ onTripCreated, onCancel }) {
     description: "",
     rating: "",
   });
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -37,12 +42,29 @@ function TripForm({ onTripCreated, onCancel }) {
 
       const token = localStorage.getItem("token");
 
-      await createTrip(token, {
-        ...formData,
-        rating: formData.rating ? Number(formData.rating) : undefined,
-      });
+      const response = await createTrip(token, {
+  ...formData,
+  rating: formData.rating
+    ? Number(formData.rating)
+    : undefined,
+});
 
-      onTripCreated();
+const createdTrip = response.data.trip;
+
+if (selectedPhoto) {
+  await uploadTripPhoto(
+    token,
+    createdTrip._id,
+    selectedPhoto
+  );
+}
+
+if (onTripCreated) {
+  onTripCreated();
+} else {
+  navigate("/dashboard");
+}
+
     } catch (error) {
       console.error("Create Trip Error:", error);
 
@@ -56,6 +78,7 @@ function TripForm({ onTripCreated, onCancel }) {
   };
 
   return (
+     <div className="create-trip-page">
     <div className="trip-form-container">
       <div className="trip-form-card">
         <h2>✈️ Create a New Trip</h2>
@@ -115,6 +138,25 @@ function TripForm({ onTripCreated, onCancel }) {
             onChange={handleChange}
           />
 
+          <label>Trip Photo</label>
+
+<input
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    setSelectedPhoto(e.target.files[0]);
+  }}
+/>
+
+{selectedPhoto && (
+  <div className="photo-preview">
+    <img
+      src={URL.createObjectURL(selectedPhoto)}
+      alt="Trip preview"
+    />
+  </div>
+)}
+
           <label>Rating</label>
           <select
             name="rating"
@@ -133,7 +175,13 @@ function TripForm({ onTripCreated, onCancel }) {
             <button
               type="button"
               className="cancel-btn"
-              onClick={onCancel}
+              onClick={() => {
+                if (onCancel) {
+                  onCancel();
+                } else {
+                  navigate("/dashboard");
+                }
+}}
               disabled={loading}
             >
               Cancel
@@ -148,6 +196,7 @@ function TripForm({ onTripCreated, onCancel }) {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

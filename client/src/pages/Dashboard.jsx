@@ -5,16 +5,21 @@ import {
   deleteTrip,
 } from "../services/tripService";
 import { useNavigate } from "react-router-dom";
-import TripForm from "../components/TripForm";
 import "../styles/dashboard.css";
+import { getDestinationImage } from "../utils/destinationImages";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [trips, setTrips] = useState([]);
   const [loadingTrips, setLoadingTrips] = useState(true);
   const [tripError, setTripError] = useState("");
-  const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showFavourites, setShowFavourites] = useState(false);
+  const [favorites, setFavorites] = useState(() => {
+  const savedFavorites = localStorage.getItem("tripFavorites");
+  return savedFavorites ? JSON.parse(savedFavorites) : [];
+});
 
   const navigate = useNavigate();
 
@@ -30,6 +35,7 @@ function Dashboard() {
 
       const token = localStorage.getItem("token");
       const response = await getTrips(token);
+      
 
       setTrips(response.data);
     } catch (error) {
@@ -60,11 +66,6 @@ function Dashboard() {
     fetchTrips();
   }, []);
 
-  const handleTripCreated = async () => {
-    setShowForm(false);
-    await fetchTrips();
-  };
-
   const handleDelete = async (tripId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this trip?"
@@ -90,7 +91,43 @@ function Dashboard() {
     }
   };
 
-  // Dashboard statistics
+  /* ================================
+     Favourite Trips
+  ================================= */
+
+  const getFavouriteTrips = () => {
+    return JSON.parse(
+      localStorage.getItem("tripvault_favourites") || "[]"
+    );
+  };
+
+  const [favourites, setFavourites] = useState(
+    getFavouriteTrips()
+  );
+
+  const toggleFavourite = (tripId) => {
+    let updatedFavourites;
+
+    if (favourites.includes(tripId)) {
+      updatedFavourites = favourites.filter(
+        (id) => id !== tripId
+      );
+    } else {
+      updatedFavourites = [...favourites, tripId];
+    }
+
+    setFavourites(updatedFavourites);
+
+    localStorage.setItem(
+      "tripvault_favourites",
+      JSON.stringify(updatedFavourites)
+    );
+  };
+
+  /* ================================
+     Statistics
+  ================================= */
+
   const totalTrips = trips.length;
 
   const ratedTrips = trips.filter(
@@ -113,15 +150,27 @@ function Dashboard() {
     )
   ).size;
 
-  // Search trips by title or destination
-  const filteredTrips = trips.filter((trip) => {
-    const search = searchTerm.toLowerCase().trim();
+  /* ================================
+     Search + Favourite Filter
+  ================================= */
 
-    return (
-      trip.title.toLowerCase().includes(search) ||
-      trip.destination.toLowerCase().includes(search)
-    );
-  });
+  const filteredTrips = trips.filter((trip) => {
+  const search = searchTerm.toLowerCase().trim();
+
+  const matchesSearch =
+    trip.title.toLowerCase().includes(search) ||
+    trip.destination.toLowerCase().includes(search);
+
+  const matchesFavourite =
+    !showFavourites ||
+    favorites.includes(trip._id);
+
+  return matchesSearch && matchesFavourite;
+});
+
+  /* ================================
+     Date Formatting
+  ================================= */
 
   const formatDate = (date) => {
     if (!date) {
@@ -135,201 +184,175 @@ function Dashboard() {
     });
   };
 
+  const toggleFavorite = (tripId) => {
+  setFavorites((prev) => {
+    const updatedFavorites = prev.includes(tripId)
+      ? prev.filter((id) => id !== tripId)
+      : [...prev, tripId];
+
+    localStorage.setItem(
+      "tripFavorites",
+      JSON.stringify(updatedFavorites)
+    );
+
+    return updatedFavorites;
+  });
+};
+
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-card">
+  <div className="dashboard-page">
 
-        {/* Dashboard Header */}
-        <div className="dashboard-header">
-          <div>
-            <h1>✈️ TripVault</h1>
+    {/* =================================
+        HEADER
+    ================================= */}
 
-            {user && (
-              <>
-                <h2>👋 Welcome, {user.name}</h2>
-                <p>📧 {user.email}</p>
-              </>
-            )}
-          </div>
+    <header className="dashboard-header">
 
-          <button
-            className="logout-btn"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
-        </div>
+      <div className="dashboard-brand">
+        <span>✈️</span>
+        <strong>TripVault</strong>
+      </div>
 
-        {/* Travel Summary */}
-        <div className="travel-summary">
-          <div className="summary-card">
-            <span className="summary-icon">🧳</span>
+      <div className="profile-area">
 
-            <div>
-              <h3>{totalTrips}</h3>
-              <p>Total Trips</p>
-            </div>
-          </div>
+        <button
+          className="profile-toggle"
+          onClick={() =>
+            setShowProfileMenu(!showProfileMenu)
+          }
+        >
+          👤 Profile
+        </button>
 
-          <div className="summary-card">
-            <span className="summary-icon">⭐</span>
+        {showProfileMenu && (
+          <div className="profile-dropdown">
 
-            <div>
-              <h3>{averageRating}</h3>
-              <p>Average Rating</p>
-            </div>
-          </div>
+            <div className="profile-info">
 
-          <div className="summary-card">
-            <span className="summary-icon">🌍</span>
-
-            <div>
-              <h3>{uniqueDestinations}</h3>
-              <p>Places Visited</p>
-            </div>
-          </div>
-        </div>
-
-        {/* My Journeys Header */}
-        <div className="trip-section-header">
-          <div>
-            <h2>🌍 My Journeys</h2>
-
-            <p>
-              Keep your favorite travel memories in one place.
-            </p>
-          </div>
-
-          <div className="trip-search">
-            <input
-              type="text"
-              placeholder="🔎 Search trips..."
-              value={searchTerm}
-              onChange={(e) =>
-                setSearchTerm(e.target.value)
-              }
-            />
-          </div>
-
-          <button
-            className="create-trip-btn"
-            onClick={() => setShowForm(true)}
-          >
-            + Create Trip
-          </button>
-        </div>
-
-        {/* Create Trip Form */}
-        {showForm && (
-          <TripForm
-            onTripCreated={handleTripCreated}
-            onCancel={() => setShowForm(false)}
-          />
-        )}
-
-        {/* Trip Content */}
-        {loadingTrips ? (
-          <div className="trip-status">
-            <p>✈️ Loading your journeys...</p>
-          </div>
-        ) : tripError ? (
-          <div className="trip-status error">
-            <p>{tripError}</p>
-
-            <button onClick={fetchTrips}>
-              Try Again
-            </button>
-          </div>
-        ) : trips.length === 0 ? (
-          /* No trips at all */
-          <div className="empty-trips">
-            <div className="empty-icon">🧳</div>
-
-            <h3>No journeys yet</h3>
-
-            <p>
-              Your travel memories are waiting to be created.
-            </p>
-
-            <p>
-              Click <strong>+ Create Trip</strong> above to
-              add your first journey.
-            </p>
-          </div>
-        ) : filteredTrips.length === 0 ? (
-          /* Trips exist, but search has no match */
-          <div className="empty-trips">
-            <div className="empty-icon">🔎</div>
-
-            <h3>No trips found</h3>
-
-            <p>
-              We couldn't find a journey matching "
-              {searchTerm}".
-            </p>
-          </div>
-        ) : (
-          /* Trip Cards */
-          <div className="trip-grid">
-            {filteredTrips.map((trip) => (
-              <div
-                className="trip-card"
-                key={trip._id}
-              >
-                <div className="trip-card-top">
-                  <h3>🌴 {trip.title}</h3>
-
-                  {trip.rating && (
-                    <span className="trip-rating">
-                      {"⭐".repeat(trip.rating)}
-                    </span>
-                  )}
-                </div>
-
-                <p className="trip-destination">
-                  📍 {trip.destination}
-                </p>
-
-                <p className="trip-dates">
-                  📅 {formatDate(trip.startDate)} →{" "}
-                  {formatDate(trip.endDate)}
-                </p>
-
-                {trip.description && (
-                  <p className="trip-description">
-                    {trip.description}
-                  </p>
-                )}
-
-                <div className="trip-actions">
-                  <button
-                    className="edit-trip-btn"
-                    onClick={() =>
-                      navigate(
-                        `/trips/edit/${trip._id}`
-                      )
-                    }
-                  >
-                    ✏️ Edit
-                  </button>
-
-                  <button
-                    className="delete-trip-btn"
-                    onClick={() =>
-                      handleDelete(trip._id)
-                    }
-                  >
-                    🗑️ Delete
-                  </button>
-                </div>
+              <div className="profile-avatar">
+                {user?.name?.charAt(0).toUpperCase()}
               </div>
-            ))}
+
+              <div>
+                <strong>{user?.name || "Traveler"}</strong>
+
+                <p>{user?.email || ""}</p>
+              </div>
+
+            </div>
+
+            <div className="profile-divider"></div>
+            <button
+  className="dropdown-profile"
+  onClick={() => navigate(`/profile/${user._id}`)}
+>
+  👤 My Profile
+</button>
+
+            <button
+              className="dropdown-logout"
+              onClick={handleLogout}
+            >
+              ↪ Logout
+            </button>
+
           </div>
         )}
 
       </div>
-    </div>
-  );
+
+    </header>
+
+
+    {/* =================================
+        WELCOME SECTION
+    ================================= */}
+
+    <main className="dashboard-home">
+
+      <section className="home-welcome">
+
+        <p>WELCOME BACK</p>
+
+        <h1>
+          👋 {user?.name || "Traveler"}!
+        </h1>
+
+        <span>
+          Collect moments, not just miles.
+        </span>
+
+      </section>
+
+
+      {/* =================================
+          MAIN OPTIONS
+      ================================= */}
+
+      <section className="dashboard-navigation">
+
+        <div
+          className="dashboard-nav-card my-journeys-card"
+          onClick={() => navigate("/my-journeys")}
+        >
+
+          <div className="dashboard-nav-icon">
+            🧳
+          </div>
+
+          <h2>My Journeys</h2>
+
+          <p>
+            View your trips, memories and
+            favourite destinations.
+          </p>
+
+          <button>
+            Open →
+          </button>
+
+        </div>
+
+
+        <div
+          className="dashboard-nav-card discover-card"
+          onClick={() => navigate("/discover")}
+        >
+
+          <div className="dashboard-nav-icon">
+            🌍
+          </div>
+
+          <h2>Discover Travelers</h2>
+
+          <p>
+            Explore journeys and memories
+            shared by other travelers.
+          </p>
+
+          <button>
+            Explore →
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    {/* =================================
+        FOOTER
+    ================================= */}
+
+    <footer className="dashboard-footer">
+
+      © 2025 TripVault. All rights reserved.
+
+    </footer>
+
+  </div>
+);
 }
 
 export default Dashboard;
