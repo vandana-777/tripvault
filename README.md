@@ -19,9 +19,9 @@ The project follows a full-stack architecture using React for the frontend, Node
 
 ---
 
-## 🚀 Tech Stack
+# 🚀 Tech Stack
 
-### Frontend
+## Frontend
 
 - React
 - Vite
@@ -29,18 +29,18 @@ The project follows a full-stack architecture using React for the frontend, Node
 - Axios
 - CSS
 
-### Backend
+## Backend
 
 - Node.js
 - Express.js
 - REST APIs
 
-### Database
+## Database
 
 - MongoDB Atlas
 - Mongoose
 
-### Authentication & Security
+## Authentication & Security
 
 - JSON Web Token (JWT)
 - bcryptjs
@@ -48,7 +48,7 @@ The project follows a full-stack architecture using React for the frontend, Node
 - Protected API routes
 - Owner-based authorization
 
-### Cloud & File Uploads
+## Cloud & File Uploads
 
 - Cloudinary
 - Multer
@@ -258,34 +258,114 @@ Public users can also view shared photographs when exploring another traveler's 
 
 ---
 
-## 🔐 Security
+## ❤️ Favourite Trips
 
-Security is an important part of the TripVault application.
+TripVault allows users to save their favourite journeys for quick access.
 
-The application uses:
+Users can:
 
-- JWT authentication
-- bcrypt password hashing
-- Protected frontend routes
-- Protected backend routes
-- Authentication middleware
-- Owner-only trip modification
-- Public routes for safe traveler information
-- Environment variables for sensitive Cloudinary credentials
+- Add a trip to favourites
+- Remove a trip from favourites
+- View favourite trips separately
+- See the favourite state directly on trip cards
 
-Private trip management requires authentication.
-
-Public profile information is separated from sensitive user information.
-
-Passwords and authentication credentials are not exposed through public profile APIs.
+The favourite interface provides visual feedback when a trip is marked as a favourite.
 
 ---
 
-# 🔌 Main API Functionality
+# 🎨 Week 4 — UI Enhancement & Deployment
 
-## Authentication
+Week 4 focused on improving the overall user interface, enhancing the user experience, and preparing the TripVault application for production deployment.
+
+### UI & User Experience Improvements
+
+The TripVault interface was refined to provide a cleaner, more modern, and user-friendly travel experience.
+
+The improvements include:
+
+- Updated overall application styling
+- Improved navigation bar
+- Improved dashboard layout
+- Enhanced trip cards
+- Improved favourite trip interface
+- Improved trip creation form
+- Improved login and registration pages
+- Added footer styling
+- Improved spacing, alignment, and visual consistency
+- Improved responsive UI
+- Improved empty states
+- Improved loading and error handling
+- Maintained existing application functionality while improving the visual experience
+
+---
+
+## 🧭 Navigation & User Experience
+
+The navigation experience was improved to make the major TripVault sections easier to access.
+
+The application provides navigation for:
+
+- Dashboard
+- My Journeys
+- Discover Travelers
+- My Profile
+- Create Trip
+- Logout
+
+Protected pages continue to require authentication.
+
+---
+
+## 📱 Responsive Interface
+
+The UI was refined to provide a consistent experience across different screen sizes.
+
+The styling focuses on:
+
+- Responsive layouts
+- Flexible trip cards
+- Mobile-friendly navigation
+- Proper spacing and alignment
+- Readable forms
+- Consistent buttons and controls
+
+---
+
+## ☁️ Production Deployment
+
+The final stage of Week 4 includes preparing TripVault for production deployment.
+
+### Backend Deployment
+
+The Node.js and Express.js backend is deployed as a Web Service using **Render**.
+
+The backend deployment includes:
+
+- Node.js backend
+- Express REST APIs
+- MongoDB Atlas connection
+- JWT authentication
+- Cloudinary image uploads
+- Environment variables for sensitive credentials
+
+### Frontend Deployment
+
+The React/Vite frontend is deployed using **Vercel**.
+
+The frontend communicates with the deployed backend through the configured API URL.
+
+The production architecture is:
 
 ```text
-POST /api/auth/register
-POST /api/auth/login
-GET  /api/auth/me
+                    TripVault
+                       │
+              ┌────────┴────────┐
+              │                 │
+          Frontend           Backend
+           Vercel             Render
+              │                 │
+              │          ┌──────┴──────┐
+              │          │             │
+              │      MongoDB Atlas  Cloudinary
+              │
+              └──── API Requests ────┘
