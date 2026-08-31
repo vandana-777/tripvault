@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/trips";
+const API_URL = "https://tripvault-2pmy.onrender.com/api/trips";
 
 export const getTrips = (token) => {
   return axios.get(API_URL, {

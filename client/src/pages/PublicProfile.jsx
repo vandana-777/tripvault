@@ -15,7 +15,7 @@ function PublicProfile() {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/auth/profile/${id}`
+          `https://tripvault-2pmy.onrender.com/api/auth/profile/${id}`
         );
 
         setProfile(response.data);

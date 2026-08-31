@@ -13,7 +13,7 @@ function DiscoverTravelers() {
     const fetchTravelers = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/auth/profiles"
+          "https://tripvault-2pmy.onrender.com/api/auth/profiles"
         );
 
         setTravelers(response.data);
