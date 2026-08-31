@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
 import "../styles/login.css";
+import { toast } from "react-toastify";
 
 function Login() {
   const navigate = useNavigate();
@@ -26,12 +27,14 @@ function Login() {
 
       localStorage.setItem("token", response.data.token);
 
-      alert("Login Successful");
+      toast.success("Login successful!");
 
       navigate("/dashboard");
 
     } catch (error) {
-      alert(error.response?.data?.message || "Login Failed");
+      toast.error(
+  error.response?.data?.message || "Login failed"
+);
     }
   };
 

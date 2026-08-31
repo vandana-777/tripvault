@@ -9,7 +9,7 @@
 
 .dashboard-page {
   min-height: 100vh;
-  background: #f7fafc;
+  background: #eef5ff;
   color: #1f2937;
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -211,7 +211,7 @@
 .welcome-label {
   margin: 0 0 5px;
 
-  color: #64748b;
+  color: #5f6f87;
 
   font-size: 13px;
   font-weight: 700;
@@ -224,7 +224,7 @@
   margin: 0;
 
   font-size: 30px;
-  color: #172033;
+  color: #4c608a;
 }
 
 .user-email {
@@ -2048,7 +2048,7 @@
 
 .dashboard-page {
   min-height: 100vh;
-  background: #f7faff;
+  background: #eef5ff;
 }
 
 /* Header */
@@ -2388,3 +2388,42 @@
 .dropdown-profile:hover {
   background: #e0ebff;
 }
+@media (max-width: 600px) {
+  .create-trip-page .trip-form-container {
+    width: calc(100% - 24px);
+    margin: 20px auto;
+  }
+
+  .create-trip-page .trip-form-card {
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+
+  .create-trip-page .date-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .create-trip-page .form-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .create-trip-page .form-buttons button {
+    width: 100%;
+  }
+
+  .create-trip-page input,
+  .create-trip-page textarea,
+  .create-trip-page select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .create-trip-page .photo-preview img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+

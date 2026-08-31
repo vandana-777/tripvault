@@ -1,10 +1,12 @@
 import { useState } from "react";
 import "../styles/register.css";
 import { registerUser } from "../services/authService";
+import { toast } from "react-toastify";
 
 function Register() {
   const [formData, setFormData] = useState({
-    name: "",
+    name:"",
+    username: "",
     email: "",
     password: "",
   });
@@ -22,13 +24,14 @@ function Register() {
   try {
     const response = await registerUser(formData);
 
-    alert(response.data.message);
+    toast.success(response.data.message);
 
     console.log(response.data);
 
   } catch (error) {
-
-    alert(error.response?.data?.message || "Registration Failed");
+    toast.error(
+      error.response?.data?.message || "Registration failed"
+    );
 
   }
 };
@@ -39,11 +42,18 @@ function Register() {
       <form className="register-card" onSubmit={handleSubmit}>
 
         <h2>Create Account</h2>
-
+        <input
+  type="text"
+  name="name"
+  placeholder="Full Name"
+  value={formData.name}
+  onChange={handleChange}
+  required
+/>
         <input
           type="text"
-          name="name"
-          placeholder="Full Name"
+          name="username"
+          placeholder="Username"
           onChange={handleChange}
         />
 

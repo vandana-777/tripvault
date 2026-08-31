@@ -7,6 +7,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import "../styles/dashboard.css";
 import { getDestinationImage } from "../utils/destinationImages";
+import { toast } from "react-toastify";
+import Footer from "../components/Footer";
 function MyJourneys() {
   const [user, setUser] = useState(null);
   const [trips, setTrips] = useState([]);
@@ -77,12 +79,12 @@ function MyJourneys() {
       const token = localStorage.getItem("token");
 
       await deleteTrip(token, tripId);
-
+      toast.success("Trip deleted successfully!");
       await fetchTrips();
     } catch (error) {
       console.error("Delete Trip Error:", error);
 
-      alert(
+      toast.error(
         error.response?.data?.message ||
           "Unable to delete the trip."
       );
@@ -215,13 +217,6 @@ function MyJourneys() {
   </div>
 
   <div className="hero-nav-actions">
-
-    <button
-      className="discover-nav-btn"
-      onClick={() => navigate("/discover")}
-    >
-      🌍 Discover Travelers
-    </button>
 
     <button
       className="hero-logout"
@@ -599,16 +594,8 @@ function MyJourneys() {
       {/* =================================
           FOOTER
       ================================= */}
-
-      <footer className="dashboard-footer">
-        <div className="footer-brand">
-          ✈️ TripVault
-        </div>
-
-        <p>
-          Your journeys. Your memories. Your story.
-        </p>
-      </footer>
+      <Footer />
+      
 
     </div>
   );

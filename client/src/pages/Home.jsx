@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
 import travelImage from "../assets/travel.svg";
-import FeatureCard from "../components/FeatureCard";
 import { useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
 
 import "../styles/home.css";
 
@@ -34,7 +34,7 @@ function Home() {
   }
 >
   Learn More
-</button>
+      </button>
           </div>
         </div>
 
@@ -42,28 +42,8 @@ function Home() {
           <img src={travelImage} alt="Travel" />
         </div>
       </section>
+      <Footer />
 
-      <section className="features">
-
-  <FeatureCard
-    icon="🗺️"
-    title="Plan Trips"
-    description="Organize every journey with destinations, schedules and notes."
-  />
-
-  <FeatureCard
-    icon="📷"
-    title="Save Memories"
-    description="Upload photos and preserve unforgettable travel moments."
-  />
-
-  <FeatureCard
-    icon="📍"
-    title="Track Destinations"
-    description="Keep a record of every place you've visited around the world."
-  />
-
-</section>
     </>
   );
 }

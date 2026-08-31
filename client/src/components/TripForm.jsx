@@ -3,6 +3,7 @@ import { useState } from "react";
 import { createTrip,uploadTripPhoto } from "../services/tripService";
 import { useNavigate } from "react-router-dom";
 import { getDestinationImage } from "../utils/destinationImages";
+import { toast } from "react-toastify";
 
 function TripForm({ onTripCreated, onCancel }) {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ function TripForm({ onTripCreated, onCancel }) {
     ? Number(formData.rating)
     : undefined,
 });
+toast.success("Trip created successfully!");
 
 const createdTrip = response.data.trip;
 
@@ -57,6 +59,7 @@ if (selectedPhoto) {
     createdTrip._id,
     selectedPhoto
   );
+   toast.success("Photo uploaded successfully!");
 }
 
 if (onTripCreated) {
@@ -68,7 +71,7 @@ if (onTripCreated) {
     } catch (error) {
       console.error("Create Trip Error:", error);
 
-      setError(
+      toast.error(
         error.response?.data?.message ||
           "Unable to create the trip. Please try again."
       );
