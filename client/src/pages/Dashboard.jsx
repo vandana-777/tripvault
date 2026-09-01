@@ -242,12 +242,32 @@ function Dashboard() {
             </div>
 
             <div className="profile-divider"></div>
-            <button
-  className="dropdown-profile"
-  onClick={() => navigate(`/profile/${user._id}`)}
->
-  👤 My Profile
-</button>
+
+            <div className="profile-stats">
+              <div className="profile-stat">
+                <span className="profile-stat-icon blue">🧳</span>
+                <div>
+                  <strong>{totalTrips}</strong>
+                  <small>Total Trips</small>
+                </div>
+              </div>
+
+              <div className="profile-stat">
+                <span className="profile-stat-icon yellow">⭐</span>
+                <div>
+                  <strong>{averageRating}</strong>
+                  <small>Rating</small>
+                </div>
+              </div>
+
+              <div className="profile-stat">
+                <span className="profile-stat-icon green">🌍</span>
+                <div>
+                  <strong>{uniqueDestinations}</strong>
+                  <small>Places Visited</small>
+                </div>
+              </div>
+            </div>
 
             <button
               className="dropdown-logout"

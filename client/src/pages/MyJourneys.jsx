@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { getUser } from "../services/authService";
-import {
-  getTrips,
-  deleteTrip,
-} from "../services/tripService";
+import { getTrips, deleteTrip } from "../services/tripService";
 import { useNavigate } from "react-router-dom";
 import "../styles/dashboard.css";
 import { getDestinationImage } from "../utils/destinationImages";
 import { toast } from "react-toastify";
 import Footer from "../components/Footer";
+
 function MyJourneys() {
   const [user, setUser] = useState(null);
   const [trips, setTrips] = useState([]);
@@ -17,34 +15,22 @@ function MyJourneys() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showFavourites, setShowFavourites] = useState(false);
   const [favorites, setFavorites] = useState(() => {
-  const savedFavorites = localStorage.getItem("tripFavorites");
-  return savedFavorites ? JSON.parse(savedFavorites) : [];
-});
+    const saved = localStorage.getItem("tripFavorites");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   const fetchTrips = async () => {
     try {
       setLoadingTrips(true);
       setTripError("");
-
       const token = localStorage.getItem("token");
       const response = await getTrips(token);
-      
-
       setTrips(response.data);
     } catch (error) {
       console.error("Fetch Trips Error:", error);
-
-      setTripError(
-        error.response?.data?.message ||
-          "Unable to load your trips."
-      );
+      setTripError(error.response?.data?.message || "Unable to load your trips.");
     } finally {
       setLoadingTrips(false);
     }
@@ -55,7 +41,6 @@ function MyJourneys() {
       try {
         const token = localStorage.getItem("token");
         const response = await getUser(token);
-
         setUser(response.data);
       } catch (error) {
         console.error("Fetch User Error:", error);
@@ -67,116 +52,51 @@ function MyJourneys() {
   }, []);
 
   const handleDelete = async (tripId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this trip?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
+    if (!window.confirm("Are you sure you want to delete this trip?")) return;
 
     try {
       const token = localStorage.getItem("token");
-
       await deleteTrip(token, tripId);
       toast.success("Trip deleted successfully!");
       await fetchTrips();
     } catch (error) {
-      console.error("Delete Trip Error:", error);
-
-      toast.error(
-        error.response?.data?.message ||
-          "Unable to delete the trip."
-      );
+      toast.error(error.response?.data?.message || "Unable to delete the trip.");
     }
   };
 
-  /* ================================
-     Favourite Trips
-  ================================= */
+  const toggleFavorite = (tripId) => {
+    setFavorites((prev) => {
+      const updated = prev.includes(tripId)
+        ? prev.filter((id) => id !== tripId)
+        : [...prev, tripId];
 
-  const getFavouriteTrips = () => {
-    return JSON.parse(
-      localStorage.getItem("tripvault_favourites") || "[]"
-    );
+      localStorage.setItem("tripFavorites", JSON.stringify(updated));
+      return updated;
+    });
   };
-
-  const [favourites, setFavourites] = useState(
-    getFavouriteTrips()
-  );
-
-  const toggleFavourite = (tripId) => {
-    let updatedFavourites;
-
-    if (favourites.includes(tripId)) {
-      updatedFavourites = favourites.filter(
-        (id) => id !== tripId
-      );
-    } else {
-      updatedFavourites = [...favourites, tripId];
-    }
-
-    setFavourites(updatedFavourites);
-
-    localStorage.setItem(
-      "tripvault_favourites",
-      JSON.stringify(updatedFavourites)
-    );
-  };
-
-  /* ================================
-     Statistics
-  ================================= */
 
   const totalTrips = trips.length;
-
-  const ratedTrips = trips.filter(
-    (trip) => trip.rating
-  );
-
-  const averageRating =
-    ratedTrips.length > 0
-      ? (
-          ratedTrips.reduce(
-            (sum, trip) => sum + trip.rating,
-            0
-          ) / ratedTrips.length
-        ).toFixed(1)
-      : "—";
-
+  const ratedTrips = trips.filter((trip) => trip.rating);
+  const averageRating = ratedTrips.length
+    ? (ratedTrips.reduce((sum, trip) => sum + Number(trip.rating), 0) / ratedTrips.length).toFixed(1)
+    : "—";
   const uniqueDestinations = new Set(
-    trips.map((trip) =>
-      trip.destination.trim().toLowerCase()
-    )
+    trips
+      .map((trip) => trip.destination?.trim().toLowerCase())
+      .filter(Boolean)
   ).size;
 
-  /* ================================
-     Search + Favourite Filter
-  ================================= */
-
   const filteredTrips = trips.filter((trip) => {
-  const search = searchTerm.toLowerCase().trim();
-
-  const matchesSearch =
-    trip.title.toLowerCase().includes(search) ||
-    trip.destination.toLowerCase().includes(search);
-
-  const matchesFavourite =
-    !showFavourites ||
-    favorites.includes(trip._id);
-
-  return matchesSearch && matchesFavourite;
-});
-
-  /* ================================
-     Date Formatting
-  ================================= */
+    const search = searchTerm.toLowerCase().trim();
+    const title = (trip.title || "").toLowerCase();
+    const destination = (trip.destination || "").toLowerCase();
+    const matchesSearch = title.includes(search) || destination.includes(search);
+    const matchesFavourite = !showFavourites || favorites.includes(trip._id);
+    return matchesSearch && matchesFavourite;
+  });
 
   const formatDate = (date) => {
-    if (!date) {
-      return "Date not specified";
-    }
-
+    if (!date) return "Date not specified";
     return new Date(date).toLocaleDateString("en-IN", {
       day: "numeric",
       month: "short",
@@ -184,419 +104,124 @@ function MyJourneys() {
     });
   };
 
-  const toggleFavorite = (tripId) => {
-  setFavorites((prev) => {
-    const updatedFavorites = prev.includes(tripId)
-      ? prev.filter((id) => id !== tripId)
-      : [...prev, tripId];
-
-    localStorage.setItem(
-      "tripFavorites",
-      JSON.stringify(updatedFavorites)
-    );
-
-    return updatedFavorites;
-  });
-};
-
   return (
-    <div className="dashboard-page">
+    <div className="dashboard-page my-journeys-page">
+      <header className="journeys-topbar">
+        <button className="journeys-brand" onClick={() => navigate("/dashboard")}>
+          <span>✈️</span> TripVault
+        </button>
 
-      {/* =================================
-          HERO SECTION
-      ================================= */}
+        <button className="journeys-back-btn" onClick={() => navigate("/dashboard")}>
+          ← Dashboard
+        </button>
+      </header>
 
-      <section className="hero-section">
+      <main className="my-journeys-main">
+        <section className="journeys-title-row">
+          <div>
+            <p className="section-label">YOUR TRAVEL MEMORIES</p>
+            <h1>My Journeys</h1>
+          </div>
 
-        <div className="hero-overlay"></div>
+          <button className="create-trip-btn" onClick={() => navigate("/trips/create")}>
+            <span>+</span> Create Trip
+          </button>
+        </section>
 
-        <nav className="hero-navbar">
-           <div className="brand">
-    <span className="brand-icon">✈️</span>
-    <span>TripVault</span>
-  </div>
+        <section className="travel-summary">
+          <div className="summary-card">
+            <div className="summary-icon blue">🧳</div>
+            <div><h3>{totalTrips}</h3><p>Total Trips</p></div>
+          </div>
 
-  <div className="hero-nav-actions">
+          <div className="summary-card">
+            <div className="summary-icon yellow">⭐</div>
+            <div><h3>{averageRating}</h3><p>Rating</p></div>
+          </div>
 
-    <button
-      className="hero-logout"
-      onClick={handleLogout}
-    >
-      Logout
-    </button>
+          <div className="summary-card">
+            <div className="summary-icon green">🌍</div>
+            <div><h3>{uniqueDestinations}</h3><p>Places Visited</p></div>
+          </div>
+        </section>
 
-  </div>
-
-</nav>
-
-
-        <div className="hero-content">
-
-          <p className="hero-small-text">
-            YOUR TRAVEL JOURNAL
-          </p>
-
-          <h1>
-            Collect moments,
-            <br />
-            not just miles.
-          </h1>
-
-          <p className="hero-description">
-            Keep your journeys, memories and
-            favourite destinations all in one place.
-          </p>
-
-          <div className="hero-search">
-
+        <div className="journey-search-row">
+          <div className="journey-search">
             <span>🔎</span>
-
             <input
               type="text"
               placeholder="Search your journeys..."
               value={searchTerm}
-              onChange={(e) =>
-                setSearchTerm(e.target.value)
-              }
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-
           </div>
-
         </div>
-
-      </section>
-
-      {/* =================================
-          MAIN CONTENT
-      ================================= */}
-
-      <main className="dashboard-main">
-
-        {/* Welcome */}
-
-        <div className="welcome-section">
-
-          <div>
-            <p className="welcome-label">
-              Welcome back
-            </p>
-
-            <h2>
-              👋 {user?.name || "Traveler"}
-            </h2>
-
-            {user && (
-              <p className="user-email">
-                {user.email}
-              </p>
-            )}
-          </div>
-
-        </div>
-
-        {/* =================================
-            STATISTICS
-        ================================= */}
-
-        <div className="travel-summary">
-
-          <div className="summary-card">
-            <div className="summary-icon blue">
-              🧳
-            </div>
-
-            <div>
-              <h3>{totalTrips}</h3>
-              <p>Total Trips</p>
-            </div>
-          </div>
-
-          <div className="summary-card">
-            <div className="summary-icon yellow">
-              ⭐
-            </div>
-
-            <div>
-              <h3>{averageRating}</h3>
-              <p>Average Rating</p>
-            </div>
-          </div>
-
-          <div className="summary-card">
-            <div className="summary-icon green">
-              🌍
-            </div>
-
-            <div>
-              <h3>{uniqueDestinations}</h3>
-              <p>Places Visited</p>
-            </div>
-          </div>
-
-        </div>
-
-        {/* =================================
-            JOURNEYS HEADER
-        ================================= */}
-
-        <div className="journeys-header">
-
-          <div>
-            <p className="section-label">
-              YOUR COLLECTION
-            </p>
-
-            <h2>🌍 My Journeys</h2>
-
-            <p className="section-description">
-              Your favourite places and unforgettable memories.
-            </p>
-          </div>
-
-          <button
-            className="create-trip-btn"
-            onClick={() => navigate("/trips/create")}
-          >
-            <span>+</span>
-            Create Trip
-          </button>
-
-        </div>
-
-        {/* =================================
-            FILTERS
-        ================================= */}
 
         <div className="journey-controls">
-
           <div className="trip-tabs">
-
-            <button
-              className={
-                !showFavourites
-                  ? "active-tab"
-                  : ""
-              }
-              onClick={() =>
-                setShowFavourites(false)
-              }
-            >
+            <button className={!showFavourites ? "active-tab" : ""} onClick={() => setShowFavourites(false)}>
               All Trips
             </button>
-
-            <button
-              className={
-                showFavourites
-                  ? "active-tab favourite-tab"
-                  : ""
-              }
-              onClick={() =>
-                setShowFavourites(true)
-              }
-            >
+            <button className={showFavourites ? "active-tab favourite-tab" : ""} onClick={() => setShowFavourites(true)}>
               ❤️ Favourites
             </button>
-
           </div>
-
-          <p className="trip-count">
-            {filteredTrips.length} journey
-            {filteredTrips.length !== 1 ? "s" : ""}
-          </p>
-
+          <p className="trip-count">{filteredTrips.length} journey{filteredTrips.length !== 1 ? "s" : ""}</p>
         </div>
 
-        {/* =================================
-            TRIP CONTENT
-        ================================= */}
-
         {loadingTrips ? (
-
-          <div className="trip-status">
-            <div className="loading-icon">✈️</div>
-            <p>Loading your journeys...</p>
-          </div>
-
+          <div className="trip-status"><div className="loading-icon">✈️</div><p>Loading your journeys...</p></div>
         ) : tripError ? (
-
-          <div className="trip-status error">
-            <p>{tripError}</p>
-
-            <button onClick={fetchTrips}>
-              Try Again
-            </button>
-          </div>
-
-        ) : trips.length === 0 ? (
-
-          <div className="empty-trips">
-
-            <div className="empty-icon">
-              🧳
-            </div>
-
-            <h3>No journeys yet</h3>
-
-            <p>
-              Your travel memories are waiting
-              to be created.
-            </p>
-
-            <button
-              className="empty-create-btn"
-              onClick={() =>
-                navigate("/trips/create")
-              }
-            >
-              + Start Your First Trip
-            </button>
-
-          </div>
-
+          <div className="trip-status error"><p>{tripError}</p><button onClick={fetchTrips}>Try Again</button></div>
         ) : filteredTrips.length === 0 ? (
-
-          <div className="empty-trips">
-
-            <div className="empty-icon">
-              {showFavourites ? "❤️" : "🔎"}
-            </div>
-
-            <h3>
-              {showFavourites
-                ? "No favourite trips yet"
-                : "No trips found"}
-            </h3>
-
-            <p>
-              {showFavourites
-                ? "Tap the heart on a trip to save it here."
-                : `We couldn't find a journey matching "${searchTerm}".`}
-            </p>
-
-          </div>
-
+          <div className="no-journey-placeholder" aria-hidden="true"></div>
         ) : (
-
           <div className="trip-grid">
+            {filteredTrips.map((trip) => (
+              <article className="trip-card" key={trip._id}>
+                <div className="trip-image-wrapper">
+                  <img
+                    src={trip.coverImage || getDestinationImage(trip.destination)}
+                    alt={trip.destination}
+                    className="trip-image"
+                  />
+                  <button
+                    className={`favourite-btn ${favorites.includes(trip._id) ? "favourited" : ""}`}
+                    onClick={() => toggleFavorite(trip._id)}
+                    title={favorites.includes(trip._id) ? "Remove from favourites" : "Add to favourites"}
+                  >
+                    {favorites.includes(trip._id) ? "♥" : "♡"}
+                  </button>
+                </div>
 
-            {filteredTrips.map((trip, index) => (
+                <div className="trip-card-content">
+                  <h3>{trip.title}</h3>
+                  <p className="trip-destination">📍 {trip.destination}</p>
+                  <p className="trip-dates">📅 {formatDate(trip.startDate)} — {formatDate(trip.endDate)}</p>
 
-              <article
-                className="trip-card"
-                key={trip._id}
-              >
-                {/* Trip Image */}
-<div className="trip-image-wrapper">
+                  {trip.description && <p className="trip-description">{trip.description}</p>}
 
-  <img
-    src={trip.coverImage || getDestinationImage(trip.destination)}
-    alt={trip.destination}
-    className="trip-image"
-  />
+                  <div className="trip-card-footer">
+                    <span className="trip-rating">
+                      {trip.rating ? `⭐ ${trip.rating}` : "No rating"}
+                    </span>
+                    <button className="view-trip-btn" onClick={() => navigate(`/trips/${trip._id}`)}>
+                      View Journey →
+                    </button>
+                  </div>
 
-  <button
-  className={`favourite-btn ${
-    favorites.includes(trip._id) ? "favourited" : ""
-  }`}
-  onClick={() => toggleFavorite(trip._id)}
-  title={
-    favorites.includes(trip._id)
-      ? "Remove from favourites"
-      : "Add to favourites"
-  }
->
-  
-  {favorites.includes(trip._id) ? "♥" : "♡"}
-
-  </button>
-
-</div>
-
-{/* Trip Details */}
-<div className="trip-card-content">
-
-  <h3>{trip.title}</h3>
-
-  <p className="trip-destination">
-    📍 {trip.destination}
-  </p>
-
-  <p className="trip-dates">
-    📅 {formatDate(trip.startDate)}
-    {" — "}
-    {formatDate(trip.endDate)}
-  </p>
-
-  {trip.description && (
-    <p className="trip-description">
-      {trip.description}
-    </p>
-  )}
-
-  <div className="trip-card-footer">
-
-    <span className="trip-rating">
-      {trip.rating
-        ? "⭐".repeat(trip.rating)
-        : "No rating"}
-    </span>
-
-    <button
-  className="view-trip-btn"
-  onClick={() =>
-    navigate(`/trips/${trip._id}`)
-  }
->
-  View Journey →
-</button>
-
-    <div className="trip-actions">
-
-      <button
-        className="icon-action edit-action"
-        title="Edit trip"
-        onClick={() =>
-          navigate(`/trips/edit/${trip._id}`)
-        }
-      >
-        ✏️
-      </button>
-
-      <button
-        className="icon-action delete-action"
-        title="Delete trip"
-        onClick={() =>
-          handleDelete(trip._id)
-        }
-      >
-        🗑️
-      </button>
-
-    </div>
-
-
-  </div>
-
-</div>
-
-                
-
+                  <div className="trip-actions">
+                    <button className="icon-action edit-action" title="Edit trip" onClick={() => navigate(`/trips/edit/${trip._id}`)}>✏️</button>
+                    <button className="icon-action delete-action" title="Delete trip" onClick={() => handleDelete(trip._id)}>🗑️</button>
+                  </div>
+                </div>
               </article>
-
             ))}
-
           </div>
-
         )}
-
       </main>
 
-      {/* =================================
-          FOOTER
-      ================================= */}
       <Footer />
-      
-
     </div>
   );
 }

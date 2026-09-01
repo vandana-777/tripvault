@@ -1,66 +1,106 @@
-.hero {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 70px 80px;
-    min-height: 85vh;
+/* =========================================
+   TRIPVAULT HOME PAGE
+========================================= */
+
+.home-page {
+  min-height: calc(100vh - 78px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 45px 20px;
+  background: #f8fafc;
 }
 
-.hero-left {
-    width: 50%;
+.home-hero {
+  width: min(900px, 100%);
+  text-align: center;
+  background: white;
+  padding: 45px 30px 50px;
+  border-radius: 24px;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
 }
 
-.hero-left h1 {
-    font-size: 56px;
-    color: #2563eb;
+.home-travel-image {
+  display: block;
+  width: min(210px, 55vw);
+  height: auto;
+  max-height: 170px;
+  object-fit: contain;
+  margin: 0 auto 22px;
 }
 
-.hero-left h2 {
-    margin-top: 15px;
-    font-size: 36px;
+.home-hero h1 {
+  margin: 0;
+  color: #2563eb;
+  font-size: clamp(38px, 6vw, 58px);
+  line-height: 1.1;
 }
 
-.hero-left p {
-    margin-top: 20px;
-    font-size: 20px;
-    color: #555;
-    line-height: 1.8;
+.home-hero h2 {
+  margin: 12px 0 0;
+  font-size: clamp(25px, 4vw, 34px);
+  color: #172033;
 }
 
-.buttons {
-    margin-top: 35px;
-    display: flex;
-    gap: 20px;
+.home-signin-text {
+  margin: 18px auto 0;
+  max-width: 560px;
+  color: #64748b;
+  font-size: 18px;
+  line-height: 1.6;
 }
 
-.buttons button {
-    padding: 15px 32px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    background: #2563eb;
-    color: white;
-    font-size: 18px;
+.home-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 28px;
 }
 
-.secondary {
-    background: #e5e7eb !important;
-    color: #222 !important;
+.home-actions button {
+  padding: 13px 26px;
+  border: none;
+  border-radius: 9px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.hero-right {
-    width: 45%;
+.home-actions button:hover {
+  background: #1d4ed8;
 }
 
-.hero-right img {
-    width: 100%;
-    max-width: 600px;
+.home-actions .home-register-btn {
+  background: #e5e7eb;
+  color: #172033;
 }
-.features{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:30px;
 
-    padding:70px 80px;
-    background:#f8fafc;
+.home-actions .home-register-btn:hover {
+  background: #dbe1e8;
+}
+
+@media (max-width: 600px) {
+  .home-page {
+    padding: 25px 14px;
+  }
+
+  .home-hero {
+    padding: 30px 18px 35px;
+    border-radius: 18px;
+  }
+
+  .home-travel-image {
+    width: 150px;
+    margin-bottom: 18px;
+  }
+
+  .home-signin-text {
+    font-size: 16px;
+  }
+
+  .home-actions {
+    flex-direction: column;
+  }
 }
